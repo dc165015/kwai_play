@@ -26,7 +26,11 @@ const config: webpack.Configuration = {
     filename: `${packageJson.name}.user.js`
   },
   resolve: {
-    extensions: [".js", ".ts", ".css", ".scss"]
+    extensions: [".js", ".ts", ".css", ".scss"],
+    alias: {
+            'src': path.resolve(__dirname, './src'),
+            'lib': path.resolve(__dirname, './src/lib'),
+    },
   },
   module: {
     rules: [

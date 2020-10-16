@@ -1,17 +1,16 @@
 {
-    "name": "Example Script",
-    "namespace": "http://www.example.com/gmscripts",
-    "description": "",
-    "include": ["http://www.example.com/*", "http://www.example.org/*"],
+    "name": "Kuaishou Website Fullscreen Player",
+    "namespace": "http://github.com/dc165015/kwai_play",
+    "description": "Play the video/photos in full-size. Use Enter key to enter/quit full screen, Space key to start or pause, ArrorLeft/ArrowRight key to navigate, L key to like/dislike. ",
     "exclude": [],
-    "version": "1.0",
-    "require": ["https://greasemonkey.github.io/gm4-polyfill/gm4-polyfill.js"],
-    "grant": ["notification"],
-    "icon": "http://www.example.net/icon.png",
-    "match": [],
+    "version": "0.1.0",
+    "require": ["tampermonkey://vendor/jquery.js"],
+    "grant": ["addStyle", "unsafeWindow"],
+    "icon": "https://static.yximgs.com/udata/pkg/WEB-LIVE/kwai_icon.8f6787d8.ico",
+    "match": ["https://live.kuaishou.com/u/*", "https://live.kuaishou.com/profile/*"],
     "noframes": false,
     "resource": [],
-    "run-at": "",
+    "run-at": "document-start",
 
     "GM3Compat": true
 }

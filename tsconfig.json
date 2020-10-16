@@ -2,10 +2,8 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "*": [
-                "*",
-                "src/*"
-            ]
+            "src/*": ["./src/*"],
+            "lib/*": ["./src/lib/*"],
         },
         "target": "es2015",
         "strict": true,
@@ -14,10 +12,17 @@
         "moduleResolution": "node",
         "preserveConstEnums": true,
         "allowSyntheticDefaultImports": true,
-        "lib": ["es2018", "dom"]
+        "lib": ["es2018", "dom"],
+        "outDir": "dist",
+        "sourceMap": true,
     },
     "include": [
         "./src/**/*.ts",
+        "./src/**/*.js",
         "./types/**/*.d.ts"
+    ],
+    "exclude": [
+        "./dist/*",
+        "./.temp/*",
     ]
 }

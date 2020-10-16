@@ -6,7 +6,7 @@ const GM3Compat = config.GM3Compat ? true : false;
 export class UserScriptHeaderPlugin {
   constructor() {}
 
-  public apply(compiler: webpack.compiler.Compiler): void {
+  public apply(compiler: webpack.Compiler): void {
     const commenter = (key: string, value: string) => {
       return `// @${key.trim().replace(/[\n\t\r]/g, "")} ${value
         .trim()
@@ -53,6 +53,7 @@ export class UserScriptHeaderPlugin {
                     }
                   }
                 }
+                
                 comment.push("// ==/UserScript==\n");
 
                 compilation.assets[file] = new ConcatSource(

@@ -1,0 +1,40 @@
+/* for picture mode */
+
+$SLIDE_INTERVAL: getGlobal('CONFIG.SLIDE_INTERVAL');
+
+.fullscreen .long-mode {
+    display: block;
+
+    img {
+        position: absolute !important;
+        max-height: 100%;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+
+        animation: slide #{$SLIDE_INTERVAL}ms ease-in-out;
+        animation-fill-mode: both;
+        animation-direction: alternate;
+
+        &.hide {
+            display: none;
+        }
+    }
+    
+    @keyframes slide {
+        0% {
+            opacity: 0.65;
+            transform: scale(1)
+        }
+    
+        35%,
+        90% {
+            opacity: 1;
+        }
+    
+        100% {
+            opacity: 0.35;
+            transform: scale(1.2)
+        }
+    }
+}

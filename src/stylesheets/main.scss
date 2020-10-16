@@ -1,0 +1,20 @@
+@import './slide.scss';
+@import './video.scss';
+
+.fullscreen {
+    width: 100% !important;
+    height: 100% !important;
+    position: fixed !important;
+    overflow: hidden !important;
+    z-index: 1001 !important;
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+    
+    ::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
+}
+
+.feed-list.collapse li {
+    padding-top: 0 !important;
+}
