@@ -30,7 +30,7 @@ declare namespace GM {
             name: string;
             namespace: string;
             resources: Object;
-            "run-at": string
+            'run-at': string;
             version: string;
         };
         scriptMetaStr: string;
@@ -57,9 +57,18 @@ declare namespace GM {
      * @see      {@link http://wiki.greasespot.net/GM.getValue}
      */
     export function getValue(name: string, defaultValue?: any): Promise<any>;
-    export function getValue(name: string, defaultValue?: string): Promise<string>;
-    export function getValue(name: string, defaultValue?: number): Promise<number>;
-    export function getValue(name: string, defaultValue?: boolean): Promise<boolean>;
+    export function getValue(
+        name: string,
+        defaultValue?: string,
+    ): Promise<string>;
+    export function getValue(
+        name: string,
+        defaultValue?: number,
+    ): Promise<number>;
+    export function getValue(
+        name: string,
+        defaultValue?: boolean,
+    ): Promise<boolean>;
 
     /**
      * Retrieves an array of names stored in the script storage.
@@ -104,7 +113,12 @@ declare namespace GM {
      * @param  onclick  callback, triggered when the notification's button is clicked.
      * @see    {@link http://wiki.greasespot.net/GM.addStyle}
      */
-    export function notification(text: string, title: string, image?: string, onclick?: Function): void;
+    export function notification(
+        text: string,
+        title: string,
+        image?: string,
+        onclick?: Function,
+    ): void;
 
     /**
      * Opens a URL in a new tab.
@@ -172,7 +186,8 @@ declare namespace GM {
     /**
      * Response object for onprogress event of {@link xmlHttpRequest}.
      */
-    export interface XMLHttpRequestProgressResponse extends XMLHttpRequestResponse {
+    export interface XMLHttpRequestProgressResponse
+        extends XMLHttpRequestResponse {
         lengthComputable: boolean;
         loaded: number;
         total: number;
@@ -184,4 +199,20 @@ declare namespace GM {
      * @see      {@link https://wiki.greasespot.net/GM.xmlHttpRequest}
      */
     export function xmlHttpRequest(details: XMLHttpRequestOptions): void;
+}
+
+declare namespace GM {
+    /**
+     * Registers an item as a submenu of User Script Commands.
+     * @param  caption      a caption of the menu item.
+     * @param  commandFunc  a function to be invoked when the item has been selected.
+     * @param  accessKey    a single character that can be used to select the item by keyboard.
+     *                      It should be a letter in the caption.
+     * @see    {@link http://wiki.greasespot.net/GM_registerMenuCommand}
+     */
+    export function registerMenuCommand(
+        caption: string,
+        commandFunc: Function,
+        accessKey?: string,
+    ): void;
 }

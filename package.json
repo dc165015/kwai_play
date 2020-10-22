@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "type": "module",
   "scripts": {
-    "build": "cross-env TS_NODE_PROJECT=\"./config/tsconfig_webpack.json\" webpack",
+    "build": "cross-env TS_NODE_PROJECT=\"./config/tsconfig_webpack.json\" webpack -w",
     "build:dev": "cross-env NODE_ENV=development npm run build",
     "build:prod": "cross-env NODE_ENV=production npm run build",
     "build:prod-min": "cross-env MINIMIZER=TRUE npm run build:prod"
   },
   "devDependencies": {
-    "@babel/core": "^7.11.6",
-    "@babel/preset-env": "^7.11.5",
     "@types/node": "^12.12.2",
     "@types/webpack": "^4.41.22",
     "@types/webpack-sources": "^2.0.0",
@@ -25,6 +24,7 @@
     "ts-loader": "^8.0.4",
     "ts-node": "^9.0.0",
     "tsconfig-paths": "^3.9.0",
+    "tsconfig-paths-webpack-plugin": "^3.3.0",
     "typescript": "^4.0.3",
     "url-loader": "^4.1.1",
     "webpack": "^4.44.2",
@@ -32,6 +32,7 @@
     "webpack-sources": "^1.4.3"
   },
   "dependencies": {
-    "@types/jquery": "^3.5.3"
+    "@types/jquery": "^3.5.3",
+    "rxjs": "^6.6.3"
   }
 }

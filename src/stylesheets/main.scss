@@ -5,14 +5,28 @@
     width: 100% !important;
     height: 100% !important;
     position: fixed !important;
+    top: 0;
+    left: 0;
     overflow: hidden !important;
     z-index: 1001 !important;
     -ms-overflow-style: none; /* Internet Explorer 10+ */
     scrollbar-width: none; /* Firefox */
-    
-    ::-webkit-scrollbar {
-        display: none; /* Safari and Chrome */
-    }
+}
+
+// ::-webkit-scrollbar {
+//     display: none; /* Safari and Chrome */
+// }
+
+.fullscreen::backdrop {
+    background-color: black;
+}
+
+.photo-preview-maincontainer {
+    position: fixed !important; // the origin position:relative will cause the scrollbar
+}
+
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
 .feed-list.collapse li {

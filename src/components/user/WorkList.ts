@@ -1,7 +1,9 @@
 import { Work } from './Work';
 import { CONFIG } from '../../config';
-import { waitForChildrenLoading, waitForTime } from 'src/lib/waits';
+import { sleep } from 'lib/util';
 import { UserProfile } from './profile';
+import log from 'lib/logger';
+import { App } from '../../app';
 
 export class WorkList {
     listEl: JQuery<HTMLElement>;
@@ -18,7 +20,7 @@ export class WorkList {
     protected async init() {
         await this.loadAllWorks();
         this.presentSortedWorkList();
-        this.user.onWorkListUpdated();
+        App.workList = this.sortedWorks;
     }
 
     get size() {
@@ -45,24 +47,25 @@ export class WorkList {
     protected *generator(): Iterator<Work, void, boolean> {
         let doRecursivelyPlay = false;
         do {
-            for (const work of this.sortByTopFirst()) {
+            for (const work of this.sortByTopLikeFirst()) {
                 doRecursivelyPlay = !!(yield work);
             }
         } while (doRecursivelyPlay);
     }
 
-    protected sortByTopFirst() {
+    protected sortByTopLikeFirst() {
         const list = Array.from(this.works.values());
         list.sort((a, b) => b.likeCount - a.likeCount);
-        return this._sortedWorks = list;
+        log(`${list.length} works were sorted at top-like-first order.`);
+        return (this._sortedWorks = list);
     }
 
     get sortedWorks() {
-        return this._sortedWorks ?? this.sortByTopFirst();
+        return this._sortedWorks ?? this.sortByTopLikeFirst();
     }
 
     protected presentSortedWorkList() {
-        const newList = this.sortedWorks.map(work => work.boxEl);
+        const newList = this.sortedWorks.map((work) => work.boxEl);
         this.listEl.append(newList);
     }
 
@@ -72,14 +75,13 @@ export class WorkList {
     }
 
     protected async loadAllWorks() {
-        this.listEl.addClass('collapse');
-        let i = 2, scollY = window.scrollY;
+        const scrollY = window.scrollY;
         while (this.hasMoreWorksToBeLoaded) {
-            // scroll to the document bottom, to minus the App's threshold is to avoid some works are just 
-            window.scrollBy({ top: i *= -1, behavior: 'smooth' });
-            await waitForTime(500);
+            log('loading more works...');
+            // scroll to the document bottom, to minus the App's threshold is to avoid some works are just
+            window.scrollBy({ top: document.documentElement.scrollTop += visualViewport.height, behavior: 'smooth' });
+            await sleep(300);
         }
-        this.listEl.removeClass('collapse');
         window.scrollTo(0, scrollY);
     }
 }

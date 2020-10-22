@@ -1,40 +1,39 @@
 /* for picture mode */
 
-$SLIDE_INTERVAL: getGlobal('CONFIG.SLIDE_INTERVAL');
-
 .fullscreen .long-mode {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.92) !important;
+    overflow: hidden !important;
 
-    img {
+    img.long-mode-item {
         position: absolute !important;
         max-height: 100%;
         width: 100%;
         height: auto;
         object-fit: contain;
+        z-index: 1002;
 
-        animation: slide #{$SLIDE_INTERVAL}ms ease-in-out;
+        animation: slide 6000ms ease-in-out forwards;
         animation-fill-mode: both;
         animation-direction: alternate;
-
-        &.hide {
-            display: none;
-        }
     }
-    
+
     @keyframes slide {
         0% {
             opacity: 0.65;
-            transform: scale(1)
+            transform: scale(1);
         }
-    
-        35%,
+
+        35%, 
         90% {
             opacity: 1;
         }
-    
+
         100% {
             opacity: 0.35;
-            transform: scale(1.2)
+            transform: scale(1.2);
         }
     }
 }

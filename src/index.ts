@@ -1,20 +1,6 @@
-import "./stylesheets/main";
-import "./lib/hackFeedsFetch";
-import { saveHistory } from "./components/history";
-import { UserProfile } from './components/user/profile';
-import { SlidePlayer } from './components/player/SlidePlayer';
-import { VideoPlayer } from "./components/player/VideoPlayer";
-import { PlayerController } from './components/player/PlayerController';
+import './stylesheets/main';
+import { App } from './app';
 
-$(() => {
-    saveHistory();
-    if (window.location.href.match(/\/profile\//)) {
-        const user = new UserProfile();
-        Object.assign(unsafeWindow, { user, $ });
-    }
-    else if (window.location.href.match(/\/u\//)) {
-        const player = VideoPlayer.from() || SlidePlayer.from();
-        PlayerController.amount(player);
-        Object.assign(unsafeWindow, { player, $ });
-    }
-});
+Object.assign(unsafeWindow, { $, App });
+
+App.init();

@@ -1,59 +1,52 @@
+import log from 'lib/logger';
 import { CONFIG } from 'src/config';
+import { selectFirstFound } from 'lib/util';
 import { Work } from '../user/Work';
 import { WorkList } from '../user/WorkList';
-import { selectFirstFound } from '../../lib/util';
-
-declare enum WorkSwitchDirection {
-    NEXT = 'left',
-    PREV = 'right'
-}
+import { PlayerCommandor, KeyCommandAction } from './PlayerCommandor';
 
 export class BasePlayer {
+    static count = 0;
 
-    isFullScreen = false;
+    id = '#' + BasePlayer.count++;
     currentPlay: Work | undefined;
+    commandor = new PlayerCommandor(this);
 
-    protected containerNextSibling: JQuery<HTMLElement>;
-    protected doAutoPlay = true;
     protected playList: WorkList | undefined;
 
-    constructor(public playerContainer: JQuery<HTMLElement>, protected originalPlayer: JQuery<HTMLElement>) {
-        this.containerNextSibling = this.playerContainer.next();
+    constructor(
+        protected originalPlayerEl: VElement,
+        public playerContainerEl: HTMLElement,
+    ) {
         this.enterFullScreen();
+        window.setTimeout(()=>this.play());
+    }
+
+    get name() {
+        return this.constructor.name + this.id;
     }
 
     toggleLike() {
         this.click(this.likeBtn);
     }
 
-    play() { };
-    stop() { };
-    togglePlay() { };
-
-    startAutoPlay(playList?: WorkList) {
-        if (playList) {
-            this.doAutoPlay = true;
-            this.playList = playList;
-        }
-        this.play();
+    setPlayList(playList: WorkList | undefined) {
+        this.playList = playList || this.playList;
     }
 
-    stopAutoPlay() {
-        this.doAutoPlay = false;
-    }
+    play() {}
+
+    stop() {}
+
+    togglePlay() {}
 
     reset() {
         this.stop();
-        this.quitFullScreen();
+        this.commandor.off();
     }
 
-    destroy() {
-        this.stop();
-        this.originalPlayer.remove();
-    }
-
-    get currentPlaySrc() {
-        return this.currentPlay?.src;
+    get isConnected() {
+        return this.originalPlayerEl.isConnected;
     }
 
     protected get nextBtn() {
@@ -65,8 +58,7 @@ export class BasePlayer {
         if (item) {
             this.currentPlay = item;
             item.click();
-        }
-        else  {
+        } else {
             this.click(this.nextBtn);
         }
     }
@@ -80,35 +72,28 @@ export class BasePlayer {
     }
 
     protected get likeBtn() {
-        return $(CONFIG.SELECTORS.LIKE_BUTTON, this.playerContainer);
+        return $(CONFIG.SELECTORS.LIKE_BUTTON, this.playerContainerEl);
     }
 
-    protected click(button: JQuery<HTMLElement> | undefined) {
-        if (button && button.length) {
-            button.trigger('click');
+    protected click($button: JQuery<HTMLElement> | undefined) {
+        if ($button && $button.length) {
+            $button.trigger('click');
         }
         return this;
     }
 
-    protected switchWork(direction = WorkSwitchDirection.NEXT) {
-        if (direction == WorkSwitchDirection.NEXT) {
-            this.showNextWork();
-        } else {
-            this.showPrevWork();
-        }
-    }
-
     protected enterFullScreen() {
-        this.playerContainer.prependTo(document.body);
-        this.playerContainer.addClass('fullscreen');
-        this.isFullScreen = true;
+        this.playerContainerEl.classList.add(CONFIG.CLASSLIST.FULLSCREEN);
     }
 
-    protected quitFullScreen() {
-        this.playerContainer.removeClass('fullscreen');
-        // recover to its original location in DOM
-        this.containerNextSibling.before(this.playerContainer);
-        this.isFullScreen = false;
+    quitFullScreen() {
+        this.playerContainerEl.classList.remove(CONFIG.CLASSLIST.FULLSCREEN);
+    }
+
+    get isFullScreen() {
+        return this.playerContainerEl.classList.contains(
+            CONFIG.CLASSLIST.FULLSCREEN,
+        );
     }
 
     toggleFullScreen() {
@@ -116,6 +101,13 @@ export class BasePlayer {
     }
 
     receivePlayList(playList: WorkList | undefined) {
-        if (playList) this.playList = playList;
+        if (playList) {
+            log('Received play list:', playList);
+            this.playList = playList;
+        }
+    }
+
+    protected addCommand(commandsObj: Record<string, KeyCommandAction>) {
+        this.commandor.setCommands(commandsObj);
     }
 }

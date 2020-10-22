@@ -1,8 +1,6 @@
 {
+    "extends": "../tsconfig.json",
     "compilerOptions": {
-        "target": "es2015",
-        "module": "commonjs",
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true
+        "module": "commonjs"
     }
 }

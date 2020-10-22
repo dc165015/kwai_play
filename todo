@@ -1,13 +1,9 @@
 TODO:
 ☐ add debug log info
 ☐ add test suite
-☐ intercept ajax
-✔ put videoplayed in history. @done(20-10-15 23:04)
-☐ find out the recommended work's box
-☐ change PlayerController to attach the player container rather than a static class
 
 FIXME:
-☐ fix next/prev @started(20-10-15 20:17)
-☐ fix the vid play timer watch
-✘ fix worklist sorting @started(20-10-16 20:10) @cancelled(20-10-16 23:53) @wasted(3h43m34s)
+☐ fix next/prev @started(20-10-15 20:17), detect player replacement, then amount playlist
 ☐ locate the index of the current playing item which was clicked by user among the worklist
+☐ fix slide pause but vid player was still there 
+☐ vid timer doesn't work

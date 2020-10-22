@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        // "jsx": "react",
         "baseUrl": ".",
         "paths": {
             "src/*": ["./src/*"],
@@ -9,8 +10,10 @@
         "strict": true,
         "allowJs": true,
         "module": "es2015",
+        // "module": "commonjs",
         "moduleResolution": "node",
         "preserveConstEnums": true,
+        "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "lib": ["es2018", "dom"],
         "outDir": "dist",
@@ -19,7 +22,8 @@
     "include": [
         "./src/**/*.ts",
         "./src/**/*.js",
-        "./types/**/*.d.ts"
+        "./types/**/*.d.ts", 
+        "./src/**/*.tsx", "types/rxjs/subscriber.ts"
     ],
     "exclude": [
         "./dist/*",
