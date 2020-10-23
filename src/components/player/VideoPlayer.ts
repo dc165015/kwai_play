@@ -8,11 +8,11 @@ export class VideoPlayer extends BasePlayer {
     // it controls the volume of all comming videos in a conform way.
     static uniformVolume = 0.5;
 
-    static from(playerContainerEl: HTMLElement) {
-        const playerEl = (playerContainerEl || App.appEl).querySelector<
+    static from(playerMainContainerEl: HTMLElement) {
+        const playerEl = (playerMainContainerEl || App.appEl).querySelector<
             HTMLElement
         >(CONFIG.SELECTORS.VIDEO_PLAYER);
-        if (playerEl) return new this(playerEl, playerContainerEl!);
+        if (playerEl) return new this(playerEl, playerMainContainerEl!);
     }
 
     protected intervalVideoTimeCheckHandle = 0;
@@ -21,9 +21,9 @@ export class VideoPlayer extends BasePlayer {
 
     constructor(
         public playerEl: HTMLElement,
-        public playerContainerEl: HTMLElement,
+        public playerMainContainerEl: HTMLElement,
     ) {
-        super(playerEl, playerContainerEl);
+        super(playerEl, playerMainContainerEl);
         this.getVideoEl();
     }
 

@@ -1,0 +1,17 @@
+$slideInterval: 5000;
+$playerContainerClass: player-container;
+$playerMainContainerClass: photo-preview-maincontainer;
+$slidePlayerClass: long-mode;
+$videoPlayerClass: kwai-player;
+$fullscreenClass: fullscreen;
+$slideFramesName: slide-frames;
+
+:export {
+    slideInterval: $slideInterval;
+    playerContainerClass: $playerContainerClass;
+    playerMainContainerClass: $playerMainContainerClass;
+    slidePlayerClass: $slidePlayerClass;
+    videoPlayerClass: $videoPlayerClass;
+    fullscreenClass: $fullscreenClass;
+    slideFramesName: $slideFramesName;
+}

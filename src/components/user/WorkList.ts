@@ -18,11 +18,11 @@ export class WorkList {
     }
 
     protected async init() {
-        if(document.hasFocus()){
+        if (document.hasFocus()) {
             await this.loadAllWorks();
             this.presentSortedWorkList();
             App.workList = this.sortedWorks;
-        }else {
+        } else {
             await sleep(1000);
             await this.init();
         }
@@ -83,21 +83,21 @@ export class WorkList {
         while (this.works.size < this.total) {
             // if there is no new works loaded from the last scroll, the scrollbar will be stuck
             // at the end of the page. Then we have try again by scroll from top again.
-            if (lastScrollY == newScrollY) {
+            if (
+                lastScrollY == newScrollY &&
+                scrollY + visualViewport.height ==
+                    document.documentElement.scrollHeight
+            ) {
                 window.scrollTo(0, 0);
+            } else {
+                // remember the works count of the last try.
+                lastScrollY = newScrollY;
             }
-
-            // remember the works count of the last try.
-            lastScrollY = newScrollY;
 
             // scroll document to bottom to trigger loading new works and then wait for DOM update
             log('loading more works...');
-            window.scrollBy({
-                top: document.documentElement.scrollTop +=
-                    visualViewport.height,
-                behavior: 'smooth',
-            });
-            await sleep(500);
+            window.scrollBy({ top: visualViewport.height, behavior: 'smooth' });
+            await sleep(1000);
 
             newScrollY = window.scrollY;
         }

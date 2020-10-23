@@ -16,10 +16,10 @@ export class BasePlayer {
 
     constructor(
         public playerEl: HTMLElement,
-        public playerContainerEl: HTMLElement,
+        public playerMainContainerEl: HTMLElement,
     ) {
         this.enterFullScreen();
-        window.setTimeout(()=>this.play());
+        window.setTimeout(() => this.play());
         this.setUpDownKeyCommands();
     }
 
@@ -41,7 +41,9 @@ export class BasePlayer {
 
     togglePlay() {}
 
-    setUpDownKeyCommands(){}
+    setUpDownKeyCommands() {}
+
+    protected cleanupBeforeSwitchWork() {}
 
     beforeUnload() {
         this.pause();
@@ -57,6 +59,7 @@ export class BasePlayer {
     }
 
     showNextWork() {
+        this.cleanupBeforeSwitchWork();
         const item = this.playList?.next();
         if (item) {
             this.currentPlayingWork = item;
@@ -71,11 +74,12 @@ export class BasePlayer {
     }
 
     showPrevWork() {
+        this.cleanupBeforeSwitchWork();
         this.click(this.prevBtn);
     }
 
     protected get likeBtn() {
-        return $(CONFIG.SELECTORS.LIKE_BUTTON, this.playerContainerEl);
+        return $(CONFIG.SELECTORS.LIKE_BUTTON, this.playerMainContainerEl);
     }
 
     protected click($button: JQuery<HTMLElement> | undefined) {
@@ -86,15 +90,15 @@ export class BasePlayer {
     }
 
     protected enterFullScreen() {
-        this.playerContainerEl.classList.add(CONFIG.CLASSLIST.FULLSCREEN);
+        this.playerMainContainerEl.classList.add(CONFIG.CLASSLIST.FULLSCREEN);
     }
 
     quitFullScreen() {
-        this.playerContainerEl.classList.remove(CONFIG.CLASSLIST.FULLSCREEN);
+        this.playerMainContainerEl.classList.remove(CONFIG.CLASSLIST.FULLSCREEN);
     }
 
     get isFullScreen() {
-        return this.playerContainerEl.classList.contains(
+        return this.playerMainContainerEl.classList.contains(
             CONFIG.CLASSLIST.FULLSCREEN,
         );
     }

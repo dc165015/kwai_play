@@ -13,11 +13,11 @@ enum PhotoSwitchDirection {
 }
 
 export class SlidePlayer extends BasePlayer {
-    static from(playerContainerEl?: HTMLElement) {
-        const playerEl = (playerContainerEl || App.appEl).querySelector<
+    static from(playerMainContainerEl?: HTMLElement) {
+        const playerEl = (playerMainContainerEl || App.appEl).querySelector<
             HTMLElement
         >(CONFIG.SELECTORS.SLIDE_PLAYER);
-        if (playerEl) return new this(playerEl, playerContainerEl!);
+        if (playerEl) return new this(playerEl, playerMainContainerEl!);
     }
 
     protected timeoutPlayHandle = 0;
@@ -27,14 +27,13 @@ export class SlidePlayer extends BasePlayer {
     protected watchImageInsertionSubscription: Subscription | undefined;
 
     slideImgIndex = -1;
-    imgs: JQuery<HTMLElement>;
+    imgs: JQuery<HTMLElement> | undefined;
 
     constructor(
         public playerEl: HTMLElement,
-        public playerContainerEl: HTMLElement,
+        public playerMainContainerEl: HTMLElement,
     ) {
-        super(playerEl, playerContainerEl);
-        this.imgs = this.getImgs();
+        super(playerEl, playerMainContainerEl);
         this.watchOnImageInsertion();
     }
 
@@ -82,37 +81,44 @@ export class SlidePlayer extends BasePlayer {
 
     // the imgs may keep comming, so it has to retrieve imgs again.
     getImgs() {
-        const imgs = $('.long-mode img.long-mode-item', this.playerContainerEl);
+        const imgs = $(
+            '.long-mode img.long-mode-item',
+            this.playerMainContainerEl,
+        );
         this.setupImgs(imgs);
-        return imgs;
+        this.imgs = imgs;
     }
 
     protected setupImgs(imgs: JQuery<HTMLElement>) {
+        imgs.css('display', 'none');
         imgs.attr('decoding', 'async');
         // imgs.attr('loading', 'lazy');
         // imgs.attr('importance', 'high');
     }
 
     protected watchOnImageInsertion() {
+        if (!this.imgs) this.getImgs();
         const ob = new MutationObservable(this.playerEl, { childList: true });
         this.watchImageInsertionObserver = ob.mutationObserver;
         this.watchImageInsertionSubscription = ob
             .pipe(
                 switchMap(({ mutations }) => {
-                    const addedNodes: HTMLElement[] = [];
+                    const addedImgs: HTMLElement[] = [];
                     for (const mutation of mutations) {
-                        if (mutation.addedNodes.length) {
-                            const imgs = Array.from(mutation.addedNodes);
-                            addedNodes.concat(imgs as HTMLElement[]);
+                        let node: Node | null, i: number;
+                        for (i = 0; (node = mutation.addedNodes.item(i)); i++) {
+                            if (node instanceof HTMLIFrameElement) {
+                                addedImgs.push(node);
+                            }
                         }
                     }
-                    return of(addedNodes);
+                    return of(addedImgs);
                 }),
             )
             .subscribe((nodes) => {
                 const imgs = $(nodes);
                 this.setupImgs(imgs);
-                this.imgs.add(imgs);
+                this.imgs?.add(imgs);
             });
     }
 
@@ -150,36 +156,33 @@ export class SlidePlayer extends BasePlayer {
         }
     }
 
-    showNextWork() {
+    protected cleanupBeforeSwitchWork() {
         this.slideImgIndex = 0;
-        super.showNextWork();
-    }
-
-    showPrevWork() {
-        this.slideImgIndex = 0;
-        super.showPrevWork();
+        this.imgs = undefined;
     }
 
     protected showImg(isManul = false) {
-        this.slideImgIndex = getSafeIndex(this.slideImgIndex, this.imgs);
-        log(`now show the #${this.slideImgIndex} image.`);
+        if (this.imgs) {
+            this.slideImgIndex = getSafeIndex(this.slideImgIndex, this.imgs);
+            
+            if (isManul && this.currentImg) {
+                this.currentImg.css('display', 'none');
+                window.clearTimeout(this.currentImgHideTimeoutHandle);
+            }
+            
+            const newComer = $(this.imgs.get(this.slideImgIndex));
+            
+            log(`now show the #${this.slideImgIndex} image.`);
+            newComer.css('display', 'block');
 
-        if (isManul && this.currentImg) {
-            this.currentImg.css('display', 'none');
-            window.clearTimeout(this.currentImgHideTimeoutHandle);
+            // hide the current after 1.2 times interval
+            this.currentImgHideTimeoutHandle = window.setTimeout(
+                () => newComer.css('display', 'none'),
+                CONFIG.SLIDE_INTERVAL * 1.2,
+            );
+
+            this.currentImg = newComer;
         }
-        const newComer = $(this.imgs.get(this.slideImgIndex));
-
-        // show the current
-        newComer.css('display', 'block');
-
-        // hide the current after 1.2 times interval
-        this.currentImgHideTimeoutHandle = window.setTimeout(
-            () => newComer.css('display', 'none'),
-            CONFIG.SLIDE_INTERVAL * 1.2,
-        );
-
-        this.currentImg = newComer;
     }
 
     setUpDownKeyCommands() {

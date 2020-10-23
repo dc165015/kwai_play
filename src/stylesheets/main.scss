@@ -1,34 +1,47 @@
+@import './variables.scss';
 @import './slide.scss';
-@import './video.scss';
 
-.fullscreen {
-    width: 100% !important;
-    height: 100% !important;
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    overflow: hidden !important;
-    z-index: 1001 !important;
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
-    scrollbar-width: none; /* Firefox */
-}
+:global {
+    .#{$fullscreenClass} {
+        position: fixed !important; // the origin position:relative will cause the scrollbar
 
-// ::-webkit-scrollbar {
-//     display: none; /* Safari and Chrome */
-// }
+        &+.close {
+            right: unset !important;
+            left: 25px !important;
+            top: 25px !important;
+        }
 
-.fullscreen::backdrop {
-    background-color: black;
-}
+        .#{$playerContainerClass} {
+            width: 100% !important;
+            height: 100% !important;
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            overflow: hidden !important;
+            z-index: 1001 !important;
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+            scrollbar-width: none; /* Firefox */
+        }
+        .comment-container {
+            position: fixed !important;
+            z-index: 1002;
+            left: -29.5%;
+            height: 80% !important;
+            width: 30%;
+            top: 50%;
+            transform: translateY(-50%);
 
-.photo-preview-maincontainer {
-    position: fixed !important; // the origin position:relative will cause the scrollbar
-}
+            &:hover {
+                left: 0;
+            }
 
-dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.9);
-}
+            &>*{
+                width: 100% !important;
+            }
+        }
+    }
 
-.feed-list.collapse li {
-    padding-top: 0 !important;
+    dialog::backdrop {
+        background-color: rgba(0, 0, 0, 0.9);
+    }
 }

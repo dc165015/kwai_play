@@ -1,5 +1,8 @@
+// import {playerContainerClass, playerMainContainerClass, videoPlayerClass, slidePlayerClass} from "../stylesheets/variables.scss";
+import SCSS from '../stylesheets/variables.scss';
+
 export const CONFIG = {
-    SLIDE_INTERVAL: 5000,
+    SLIDE_INTERVAL: Number(SCSS.slideInterval),
 
     MATCHES: {
         PROFILE_URL: /kuaishou\.com\/profile\/(.*)(\/|\?)?.*/,
@@ -9,11 +12,11 @@ export const CONFIG = {
         ENABLE_DEBUG: {
             key: 'debugEnabler',
             inputId: 'debugEnabler',
-        }
+        },
     },
 
     CLASSLIST: {
-        FULLSCREEN: 'fullscreen',
+        FULLSCREEN: SCSS.fullscreenClass,
     },
 
     SELECTORS: {
@@ -22,16 +25,25 @@ export const CONFIG = {
         STATS_USERDATA_SUMMARY: '.user-data-summary',
         STATS_USERDATA_WORKCOUNT: '.user-data-item.work',
         PROFILE_WORKVIEW_PANEL: '.photo-preview',
-        PLAYER_CONTAINER: '.player-container',
+        
+        PLAYER_MAINCONTAINER: '.' + SCSS.playerMainContainerClass,
+        PLAYER_CONTAINER: '.' + SCSS.playerContainerClass,
+        VIDEO_PLAYER: '.' + SCSS.videoPlayerClass,
+        SLIDE_PLAYER: '.' + SCSS.slidePlayerClass,
 
-        VIDEO_PLAYER: '.kwai-player',
-        SLIDE_PLAYER: '.long-mode',
-
+        CLOSE_BUTTON: '.close',
         LIKE_BUTTON: '.like-icon',
         PLAY_BUTTON: '.play-icon',
-        NEXTWORK_BUTTONS: ['.arrow-right', '.photo-preview-btn-next', '.end-info-reco-next'],
-        PREVWORK_BUTTONS: ['.arrow-left', '.photo-preview-btn-prev', '.end-info-reco-replay'],
-        CLOSE_BUTTON: '.close',
+        NEXTWORK_BUTTONS: [
+            '.arrow-right',
+            '.photo-preview-btn-next',
+            '.end-info-reco-next',
+        ],
+        PREVWORK_BUTTONS: [
+            '.arrow-left',
+            '.photo-preview-btn-prev',
+            '.end-info-reco-replay',
+        ],
 
         WORK_LIST: '.feed-list',
         WORK_CARD: '.work-card',

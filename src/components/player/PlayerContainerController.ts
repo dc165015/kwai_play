@@ -96,8 +96,8 @@ export class PlayerContainerController {
             } else {
                 select = document.querySelector.bind(document);
             }
-            this._containerEl = select<HTMLElement>(SELECTORS.PLAYER_CONTAINER);
-            this._containerEl && log('Got the player container.');
+            this._containerEl = select<HTMLElement>(SELECTORS.PLAYER_MAINCONTAINER);
+            this._containerEl && log('Got the player main container.');
         }
         return this._containerEl;
     }

@@ -23,7 +23,7 @@
         "./src/**/*.ts",
         "./src/**/*.js",
         "./types/**/*.d.ts", 
-        "./src/**/*.tsx", "types/rxjs/subscriber.ts"
+        "./src/**/*.tsx", 
     ],
     "exclude": [
         "./dist/*",
