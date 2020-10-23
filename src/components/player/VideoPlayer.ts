@@ -2,85 +2,65 @@ import { BasePlayer } from './BasePlayer';
 import { CONFIG } from 'src/config';
 import { App } from '../../app';
 
-enum VolumeSwitchDirection {
-    HIGHER = 'up',
-    LOWER = 'down',
-}
-
 export class VideoPlayer extends BasePlayer {
+    static TailedADDuration = 5;
+    static VolumeStep = 0.1;
+    // it controls the volume of all comming videos in a conform way.
+    static uniformVolume = 0.5;
+
     static from(playerContainerEl: HTMLElement) {
         const playerEl = (playerContainerEl || App.appEl).querySelector<
-            VElement
+            HTMLElement
         >(CONFIG.SELECTORS.VIDEO_PLAYER);
         if (playerEl) return new this(playerEl, playerContainerEl!);
     }
 
-    video: HTMLVideoElement | undefined;
-
-    protected totalTimer: JQuery<HTMLElement> | undefined;
-    protected currentTimer: JQuery<HTMLElement> | undefined;
     protected intervalVideoTimeCheckHandle = 0;
-    protected _playBtn: JQuery<HTMLElement> | undefined;
+
+    videoEl: HTMLVideoElement | null | undefined;
 
     constructor(
-        public playerEl: VElement,
+        public playerEl: HTMLElement,
         public playerContainerEl: HTMLElement,
     ) {
-        super(playerEl!, playerContainerEl!);
-        this.setUpDownKeyCommands();
+        super(playerEl, playerContainerEl);
+        this.getVideoEl();
     }
 
-    protected get totalVideoTime() {
-        this.totalTimer = $('.progress-time-total', this.playerContainerEl);
-        return this.resolveVideoTimer(this.totalTimer);
-    }
-
-    protected get currentVideoTime() {
-        this.currentTimer = $('.progress-time-current', this.playerContainerEl);
-        return this.resolveVideoTimer(this.currentTimer);
-    }
-
-    protected get leftVideoTime() {
-        return this.totalVideoTime - this.currentVideoTime;
+    protected getVideoEl() {
+        this.videoEl = this.playerEl.querySelector('video');
+        if (this.videoEl) {
+            this.videoEl.volume = VideoPlayer.uniformVolume;
+            this.onVideoSrcChange(this.videoEl);
+        }
     }
 
     // the last 6s content is advertisement which shall be skipped.
     protected get isADTime() {
-        return this.leftVideoTime <= 5.5;
-    }
-
-    protected get playBtn() {
-        return (this._playBtn ||= $(
-            CONFIG.SELECTORS.PLAY_BUTTON,
-            this.playerContainerEl,
-        ));
+        if (this.videoEl) {
+            return (
+                this.videoEl.duration - this.videoEl.currentTime <=
+                VideoPlayer.TailedADDuration
+            );
+        }
     }
 
     get isPlaying() {
-        // when video is playing, the play button has a rect element in svg. Otherwise, it hasn't.
-        return this.playBtn && !$('svg rect', this.playBtn).length;
-    }
-
-    get vuePlayerCtrl() {
-        return this.playerEl.__vue__ as VueVideo;
+        return this.videoEl && !this.videoEl.paused;
     }
 
     play() {
-        if (!this.isPlaying) {
-            this.vuePlayerCtrl && this.vuePlayerCtrl.play
-                ? this.vuePlayerCtrl.play()
-                : this.click(this.playBtn);
-        }
+        this.videoEl?.play();
         this.startAutoSkipAD();
     }
 
-    stop() {
+    pause() {
         this.stopAutoSkipAD();
-        this.vuePlayerCtrl?.pause();
+        this.videoEl?.pause();
     }
 
     togglePlay() {
-        this.isPlaying ? this.stop() : this.play();
+        this.isPlaying ? this.pause() : this.play();
     }
 
     protected startAutoSkipAD() {
@@ -105,29 +85,34 @@ export class VideoPlayer extends BasePlayer {
         }
     }
 
-    // convert time string "02:01:01" to 7261s
-    protected resolveVideoTimer(timer: JQuery<HTMLElement>) {
-        const str = timer.text();
-        const arr = str.split(':').map((n) => Number(n));
-        return arr.reduce((total, current) => (total = current + total * 60));
-    }
-
-    protected volume(direction = VolumeSwitchDirection.HIGHER) {
-        if (this.vuePlayerCtrl) {
-            let volume = this.vuePlayerCtrl.volume;
-            volume ||= 0.1;
-            volume = direction == 'up' ? (volume *= 1.382) : (volume *= 0.618);
-            this.vuePlayerCtrl.volume =
-                volume > 1 ? 1 : volume < 0.1 ? 0 : volume;
+    set volume(n: number) {
+        if (this.videoEl) {
+            if (n < 0) {
+                n = 0;
+            } else if (n > 1) {
+                n = 1;
+            }
+            VideoPlayer.uniformVolume = this.videoEl.volume = n;
         }
     }
 
+    get volume() {
+        return this.videoEl?.volume || 0;
+    }
+
+    protected onVideoSrcChange(video: HTMLVideoElement) {
+        $(video).on(
+            'loadeddata',
+            () => (video.volume = VideoPlayer.uniformVolume),
+        );
+    }
+
     volumeUp() {
-        this.volume(VolumeSwitchDirection.HIGHER);
+        this.volume += VideoPlayer.VolumeStep;
     }
 
     volumeDown() {
-        this.volume(VolumeSwitchDirection.LOWER);
+        this.volume -= VideoPlayer.VolumeStep;
     }
 
     setUpDownKeyCommands() {

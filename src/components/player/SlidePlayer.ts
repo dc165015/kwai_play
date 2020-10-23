@@ -3,7 +3,9 @@ import { CONFIG } from 'src/config';
 import { getSafeIndex } from 'lib/util';
 import { App } from '../../app';
 import log from 'src/lib/logger';
-import { WorkList } from '../user/WorkList';
+import { MutationObservable } from '../../lib/MutationObservable';
+import { switchMap } from 'rxjs/operators';
+import { of, Subscription } from 'rxjs';
 
 enum PhotoSwitchDirection {
     NEXT = 'down',
@@ -13,33 +15,38 @@ enum PhotoSwitchDirection {
 export class SlidePlayer extends BasePlayer {
     static from(playerContainerEl?: HTMLElement) {
         const playerEl = (playerContainerEl || App.appEl).querySelector<
-            VElement
+            HTMLElement
         >(CONFIG.SELECTORS.SLIDE_PLAYER);
         if (playerEl) return new this(playerEl, playerContainerEl!);
     }
 
+    protected timeoutPlayHandle = 0;
+    protected currentImgHideTimeoutHandle = 0;
+    protected currentImg: JQuery<HTMLElement> | undefined;
+    protected watchImageInsertionObserver: MutationObserver | undefined;
+    protected watchImageInsertionSubscription: Subscription | undefined;
+
     slideImgIndex = -1;
-    timeoutPlayHandle = 0;
-    protected interval = CONFIG.SLIDE_INTERVAL;
+    imgs: JQuery<HTMLElement>;
 
     constructor(
-        public playerEl: VElement,
+        public playerEl: HTMLElement,
         public playerContainerEl: HTMLElement,
     ) {
-        super(playerEl!, playerContainerEl!);
-        this.setUpDownKeyCommands();
-        this.imgs.css('display', 'none');
+        super(playerEl, playerContainerEl);
+        this.imgs = this.getImgs();
+        this.watchOnImageInsertion();
     }
 
     play() {
         this.slide(PhotoSwitchDirection.NEXT);
-        this.startAutoPlay();
+        this.startAutoSlide();
     }
 
-    protected startAutoPlay() {
+    protected startAutoSlide() {
         this.timeoutPlayHandle = window.setTimeout(
             () => this.play(),
-            this.interval,
+            CONFIG.SLIDE_INTERVAL,
         );
     }
 
@@ -47,11 +54,11 @@ export class SlidePlayer extends BasePlayer {
         return !!this.timeoutPlayHandle;
     }
 
-    stop() {
-        this.stopAutoPlay();
+    pause() {
+        this.stopAutoSlide();
     }
 
-    protected stopAutoPlay() {
+    protected stopAutoSlide() {
         if (this.timeoutPlayHandle) {
             window.clearTimeout(this.timeoutPlayHandle);
             this.timeoutPlayHandle = 0;
@@ -60,86 +67,128 @@ export class SlidePlayer extends BasePlayer {
 
     togglePlay() {
         if (this.timeoutPlayHandle) {
-            this.stop();
+            this.pause();
         } else {
             this.play();
         }
     }
 
-    reset() {
-        super.reset();
+    beforeUnload() {
+        super.beforeUnload();
         this.slideImgIndex = 0;
+        this.watchImageInsertionObserver?.disconnect();
+        this.watchImageInsertionSubscription?.unsubscribe();
     }
 
     // the imgs may keep comming, so it has to retrieve imgs again.
-    get imgs() {
-        return $('.long-mode img.long-mode-item', this.playerContainerEl);
+    getImgs() {
+        const imgs = $('.long-mode img.long-mode-item', this.playerContainerEl);
+        this.setupImgs(imgs);
+        return imgs;
     }
 
-    showNextImg() {
-        this.slide(PhotoSwitchDirection.NEXT);
+    protected setupImgs(imgs: JQuery<HTMLElement>) {
+        imgs.attr('decoding', 'async');
+        // imgs.attr('loading', 'lazy');
+        // imgs.attr('importance', 'high');
     }
 
-    showPrevImg() {
-        this.slide(PhotoSwitchDirection.PREV);
+    protected watchOnImageInsertion() {
+        const ob = new MutationObservable(this.playerEl, { childList: true });
+        this.watchImageInsertionObserver = ob.mutationObserver;
+        this.watchImageInsertionSubscription = ob
+            .pipe(
+                switchMap(({ mutations }) => {
+                    const addedNodes: HTMLElement[] = [];
+                    for (const mutation of mutations) {
+                        if (mutation.addedNodes.length) {
+                            const imgs = Array.from(mutation.addedNodes);
+                            addedNodes.concat(imgs as HTMLElement[]);
+                        }
+                    }
+                    return of(addedNodes);
+                }),
+            )
+            .subscribe((nodes) => {
+                const imgs = $(nodes);
+                this.setupImgs(imgs);
+                this.imgs.add(imgs);
+            });
+    }
+
+    showNextImg(isManul = false) {
+        this.slide(PhotoSwitchDirection.NEXT, isManul);
+    }
+
+    showPrevImg(isManul = false) {
+        this.slide(PhotoSwitchDirection.PREV, isManul);
     }
 
     // param j is for slide backward/forward step.
-    protected slide(direction = PhotoSwitchDirection.NEXT) {
+    protected slide(direction = PhotoSwitchDirection.NEXT, isManul = false) {
         const imgs = this.imgs;
         if (imgs) {
             if (
                 direction == PhotoSwitchDirection.NEXT &&
-                ++this.slideImgIndex == imgs.length
+                ++this.slideImgIndex == imgs.length &&
+                !isManul
             ) {
                 log('reached the last image, will show next work now.');
-                this.stopAutoPlay();
+                this.stopAutoSlide();
                 this.showNextWork();
             } else if (
                 direction == PhotoSwitchDirection.PREV &&
-                --this.slideImgIndex == -1
+                --this.slideImgIndex == -1 &&
+                !isManul
             ) {
                 log('reached the first image, will show prev work now.');
-                this.stopAutoPlay();
+                this.stopAutoSlide();
                 this.showPrevWork();
             } else {
-                this.showImg(imgs);
+                this.showImg(isManul);
             }
         }
     }
 
-    async showNextWork() {
+    showNextWork() {
         this.slideImgIndex = 0;
-        await super.showNextWork();
+        super.showNextWork();
     }
 
-    async showPrevWork() {
+    showPrevWork() {
         this.slideImgIndex = 0;
-        await super.showPrevWork();
+        super.showPrevWork();
     }
 
-    protected showImg(imgs: JQuery<HTMLElement>) {
-
-        const currentImg = $(imgs[this.slideImgIndex]);
+    protected showImg(isManul = false) {
+        this.slideImgIndex = getSafeIndex(this.slideImgIndex, this.imgs);
         log(`now show the #${this.slideImgIndex} image.`);
 
+        if (isManul && this.currentImg) {
+            this.currentImg.css('display', 'none');
+            window.clearTimeout(this.currentImgHideTimeoutHandle);
+        }
+        const newComer = $(this.imgs.get(this.slideImgIndex));
+
         // show the current
-        currentImg.css('display', 'block');
+        newComer.css('display', 'block');
 
         // hide the current after 1.2 times interval
-        setTimeout(
-            () => currentImg.css('display', 'none'),
-            this.interval * 1.2,
+        this.currentImgHideTimeoutHandle = window.setTimeout(
+            () => newComer.css('display', 'none'),
+            CONFIG.SLIDE_INTERVAL * 1.2,
         );
+
+        this.currentImg = newComer;
     }
 
     setUpDownKeyCommands() {
         this.addCommand({
             ArrowUp: () => {
-                this.showPrevImg();
+                this.showPrevImg(true);
             },
             ArrowDown: () => {
-                this.showNextImg();
+                this.showNextImg(true);
             },
         });
     }

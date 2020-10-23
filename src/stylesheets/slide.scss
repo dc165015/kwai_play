@@ -14,6 +14,7 @@
         height: auto;
         object-fit: contain;
         z-index: 1002;
+        display: none;
 
         animation: slide 6000ms ease-in-out forwards;
         animation-fill-mode: both;

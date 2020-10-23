@@ -21,7 +21,7 @@ export function keepPlayHistory(){
 export function fixPageLostOnRefresh(){
     $(window).on('beforeunload', ()=>{
         if (!App.isProfilePage){
-            history.pushState(null, document.title, App.url);
+            history.pushState(null, document.title, App.baseUrl);
             log(`Before leave this page, push the profile page url into history`);
             return 'Are you sure to leave?';
         }

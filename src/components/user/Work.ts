@@ -9,7 +9,6 @@ enum WorkType {
 export class Work {
     src: string | undefined;
     index: number | undefined;
-    feed: VueWork['feed'] | undefined;
     cardEl: HTMLElement;
     likeCountView: string | undefined;
     workType: WorkType | undefined;
@@ -23,17 +22,8 @@ export class Work {
         this.src = $('img', this.cardEl)
             .attr('src')
             ?.match(/(.*?\.jpg).*/)?.[1];
-        this.extractVueData((<any>this.cardEl).__vue__);
     }
 
-    protected extractVueData(v: VueWork) {
-        if (v) {
-            this.index = v.index;
-            this.likeCountView = v.likeCount;
-            this.feed = v.feed;
-            this.workType = v.feed.workType == WorkType.Video ? WorkType.Video : WorkType.Photo;
-        }
-    }
 
     click() {
         this.contentEl?.trigger('click');

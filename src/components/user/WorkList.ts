@@ -18,9 +18,14 @@ export class WorkList {
     }
 
     protected async init() {
-        await this.loadAllWorks();
-        this.presentSortedWorkList();
-        App.workList = this.sortedWorks;
+        if(document.hasFocus()){
+            await this.loadAllWorks();
+            this.presentSortedWorkList();
+            App.workList = this.sortedWorks;
+        }else {
+            await sleep(1000);
+            await this.init();
+        }
     }
 
     get size() {
@@ -69,19 +74,34 @@ export class WorkList {
         this.listEl.append(newList);
     }
 
-    protected get hasMoreWorksToBeLoaded() {
-        const amount = this.works.size;
-        return amount < this.total || amount >= 1000;
-    }
-
     protected async loadAllWorks() {
-        const scrollY = window.scrollY;
-        while (this.hasMoreWorksToBeLoaded) {
+        const originalScrollY = window.scrollY;
+
+        let newScrollY = 0,
+            lastScrollY = 0;
+
+        while (this.works.size < this.total) {
+            // if there is no new works loaded from the last scroll, the scrollbar will be stuck
+            // at the end of the page. Then we have try again by scroll from top again.
+            if (lastScrollY == newScrollY) {
+                window.scrollTo(0, 0);
+            }
+
+            // remember the works count of the last try.
+            lastScrollY = newScrollY;
+
+            // scroll document to bottom to trigger loading new works and then wait for DOM update
             log('loading more works...');
-            // scroll to the document bottom, to minus the App's threshold is to avoid some works are just
-            window.scrollBy({ top: document.documentElement.scrollTop += visualViewport.height, behavior: 'smooth' });
-            await sleep(300);
+            window.scrollBy({
+                top: document.documentElement.scrollTop +=
+                    visualViewport.height,
+                behavior: 'smooth',
+            });
+            await sleep(500);
+
+            newScrollY = window.scrollY;
         }
-        window.scrollTo(0, scrollY);
+
+        window.scrollTo(0, originalScrollY);
     }
 }

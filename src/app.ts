@@ -15,7 +15,7 @@ export class App {
     static feeds: WorkFeed[] = [];
     static albums: WorkFeed[] = [];
     static videos: WorkFeed[] = [];
-    static url: string;
+    static baseUrl: string;
     static user: UserProfile;
     static ctrl: PlayerContainerController;
 
@@ -50,7 +50,7 @@ export class App {
 
     static init() {
         if (this.isProfilePage) {
-            this.url = location.href;
+            this.baseUrl = location.href;
 
             keepPlayHistory();
             fixPageLostOnRefresh();

@@ -117,7 +117,7 @@ export class PlayerContainerController {
 
     protected cleanupAfterWorkViewPanelRemoved() {
         log('Work view panel is unloaded.');
-        this._player?.reset();
+        this._player?.beforeUnload();
         this._workViewPanelEl = undefined;
         this._player = undefined;
         this._containerEl = undefined;
@@ -164,7 +164,7 @@ export class PlayerContainerController {
                     ),
                     tap(()=>{
                         log('Current player was removed.');
-                        this._player?.reset();
+                        this._player?.beforeUnload();
                         this._player = undefined;
                     }),
                     delay(20),

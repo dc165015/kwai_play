@@ -9,17 +9,18 @@ export class BasePlayer {
     static count = 0;
 
     id = '#' + BasePlayer.count++;
-    currentPlay: Work | undefined;
+    currentPlayingWork: Work | undefined;
     commandor = new PlayerCommandor(this);
 
     protected playList: WorkList | undefined;
 
     constructor(
-        protected originalPlayerEl: VElement,
+        public playerEl: HTMLElement,
         public playerContainerEl: HTMLElement,
     ) {
         this.enterFullScreen();
         window.setTimeout(()=>this.play());
+        this.setUpDownKeyCommands();
     }
 
     get name() {
@@ -36,17 +37,19 @@ export class BasePlayer {
 
     play() {}
 
-    stop() {}
+    pause() {}
 
     togglePlay() {}
 
-    reset() {
-        this.stop();
+    setUpDownKeyCommands(){}
+
+    beforeUnload() {
+        this.pause();
         this.commandor.off();
     }
 
     get isConnected() {
-        return this.originalPlayerEl.isConnected;
+        return this.playerEl.isConnected;
     }
 
     protected get nextBtn() {
@@ -56,7 +59,7 @@ export class BasePlayer {
     showNextWork() {
         const item = this.playList?.next();
         if (item) {
-            this.currentPlay = item;
+            this.currentPlayingWork = item;
             item.click();
         } else {
             this.click(this.nextBtn);
